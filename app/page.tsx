@@ -9,9 +9,9 @@ export default function Home() {
   const [defaultModel, setDefaultModel] = useState("OpenAI 4o-mini");
   const [comparisonModel, setComparisonModel] = useState("Gemini");
   const [additionalModels, setAdditionalModels] = useState([]);
-  const [selectedModels, setSelectedModels] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [showResponses, setShowResponses] = useState(false);
+  const [selectedModels, setSelectedModels] = useState([]);
 
   const models = ["OpenAI 4o-mini", "Gemini", "Gemma", "Llama", "DeepSeek"];
   const responses = {
@@ -27,9 +27,9 @@ export default function Home() {
   };
 
   const handleModelChange = (index, value) => {
-    const newModels = [...additionalModels];
-    newModels[index] = value;
-    setAdditionalModels(newModels);
+    const updatedModels = [...additionalModels];
+    updatedModels[index] = value;
+    setAdditionalModels(updatedModels);
   };
 
   const handleEnter = () => {
@@ -39,40 +39,13 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-6">
-      <Card className="w-full max-w-2xl shadow-xl bg-white p-6 rounded-2xl">
-        <h1 className="text-3xl font-bold text-center mb-6">LLM Evaluation Platform</h1>
-        <div className="flex items-center gap-4 mb-6">
-          <Select onValueChange={setDefaultModel} defaultValue={defaultModel}>
-            <SelectTrigger className="w-1/4">
-              <SelectValue placeholder="Select a model" />
-            </SelectTrigger>
-            <SelectContent>
-              {models.map((model) => (
-                <SelectItem key={model} value={model}>
-                  {model}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select onValueChange={setComparisonModel} defaultValue={comparisonModel}>
-            <SelectTrigger className="w-1/4">
-              <SelectValue placeholder="Select a model" />
-            </SelectTrigger>
-            <SelectContent>
-              {models.map((model) => (
-                <SelectItem key={model} value={model}>
-                  {model}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {additionalModels.map((model, index) => (
-            <Select
-              key={index}
-              onValueChange={(value) => handleModelChange(index, value)}
-              defaultValue={model}
-            >
-              <SelectTrigger className="w-1/4">
+      <div className="flex flex-col md:flex-row w-full max-w-5xl gap-6">
+        {/* LLM Evaluation Platform Card */}
+        <Card className="flex-1 shadow-xl bg-white p-6 rounded-2xl">
+          <h1 className="text-3xl font-bold text-center mb-6">LLM Evaluation Platform</h1>
+          <div className="flex flex-wrap gap-4 mb-6">
+            <Select onValueChange={setDefaultModel} defaultValue={defaultModel}>
+              <SelectTrigger className="w-1/3">
                 <SelectValue placeholder="Select a model" />
               </SelectTrigger>
               <SelectContent>
@@ -83,42 +56,71 @@ export default function Home() {
                 ))}
               </SelectContent>
             </Select>
-          ))}
-          <Button
-            className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
-            onClick={handleAddModel}
-          >
-            Add Model
-          </Button>
-        </div>
-        <Textarea
-          className="w-full p-3 rounded-lg border border-gray-300 focus:ring focus:ring-blue-300"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          placeholder="Enter your text..."
-        />
-        <div className="flex justify-end mt-4">
-          <Button
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-            onClick={handleEnter}
-          >
-            Enter
-          </Button>
-        </div>
-      </Card>
-      {showResponses && (
-        <Card className="w-full max-w-2xl shadow-xl bg-white p-6 rounded-2xl mt-6">
-          <h2 className="text-xl font-semibold mb-4">Responses</h2>
-          {selectedModels.map(
-            (model) =>
-              responses[model] && (
-                <CardContent key={model} className="p-3 mb-2 border rounded-lg">
-                  <strong>{model}:</strong> {responses[model]}
-                </CardContent>
-              )
-          )}
+            <Select onValueChange={setComparisonModel} defaultValue={comparisonModel}>
+              <SelectTrigger className="w-1/3">
+                <SelectValue placeholder="Select a model" />
+              </SelectTrigger>
+              <SelectContent>
+                {models.map((model) => (
+                  <SelectItem key={model} value={model}>
+                    {model}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {additionalModels.map((model, index) => (
+              <Select
+                key={index}
+                onValueChange={(value) => handleModelChange(index, value)}
+                defaultValue={model}
+              >
+                <SelectTrigger className="w-1/3">
+                  <SelectValue placeholder="Select a model" />
+                </SelectTrigger>
+                <SelectContent>
+                  {models.map((model) => (
+                    <SelectItem key={model} value={model}>
+                      {model}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ))}
+            <Button
+              className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
+              onClick={handleAddModel}
+            >
+              Add Model
+            </Button>
+          </div>
+          <Textarea
+            className="w-full p-3 rounded-lg border border-gray-300 focus:ring focus:ring-blue-300"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            placeholder="Enter your text..."
+          />
+          <div className="flex justify-end mt-4">
+            <Button
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+              onClick={handleEnter}
+            >
+              Enter
+            </Button>
+          </div>
         </Card>
-      )}
+
+        {/* Responses Card */}
+        {showResponses && (
+          <Card className="flex-1 shadow-xl bg-white p-6 rounded-2xl">
+            <h2 className="text-xl font-semibold mb-4">Responses</h2>
+            {selectedModels.map((model) => (
+              <CardContent key={model} className="p-3 mb-2 border rounded-lg">
+                <strong>{model}:</strong> {responses[model] || "No response available."}
+              </CardContent>
+            ))}
+          </Card>
+        )}
+      </div>
     </div>
   );
 }
