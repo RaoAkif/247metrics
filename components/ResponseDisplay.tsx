@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Radar,
@@ -19,6 +20,7 @@ import {
   ScatterChart,
   Scatter
 } from "recharts";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface ResponseDisplayProps {
   selectedModels: string[];
@@ -27,7 +29,10 @@ interface ResponseDisplayProps {
 }
 
 export default function ResponseDisplay({ selectedModels, responses, selectedMetrics }: ResponseDisplayProps) {
-  // Map the evaluation metric names (from Home) to the internal ones used below.
+  // Local state to control the collapse/expand of Model Responses
+  const [responsesOpen, setResponsesOpen] = useState(true);
+
+  // Mapping evaluation metric names (from checkboxes) to internal names.
   const metricMapping: { [key: string]: string } = {
     "Accuracy of Responses": "Accuracy & Relevance (Factuality)",
     "Response Time (Latency)": "Response Speed & Efficiency",
@@ -64,7 +69,7 @@ export default function ResponseDisplay({ selectedModels, responses, selectedMet
     "Conversational Flow & Engagement"
   ];
 
-  // Convert selected evaluation metrics (from checkboxes) into our internal names.
+  // Convert selected evaluation metrics into internal names.
   const internalSelectedMetrics = selectedMetrics
     .map((m) => metricMapping[m])
     .filter(Boolean);
@@ -72,21 +77,20 @@ export default function ResponseDisplay({ selectedModels, responses, selectedMet
     internalSelectedMetrics.includes(metric)
   );
 
-  // Helper: generate a dummy score based on a category and model name.
+  // Helper: Generate dummy scores based on a category and model name.
   const getDummyScore = (category: string, model: string) => {
     const base = model.charCodeAt(0);
     const catFactor = category.length;
     return Math.floor(((base + catFactor) % 50) + 50); // yields a value between 50 and 99
   };
 
-  // Colors for chart elements
+  // Colors for chart elements.
   const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff7300", "#0088FE", "#00C49F"];
 
   // Render a visualization based on the metric name.
   function renderChart(metricName: string) {
     switch (metricName) {
       case "Accuracy & Relevance (Factuality)": {
-        // Radar Chart: comparing three sub-categories.
         const radarCategories = ["Semantic Similarity", "Exact Match", "Knowledge Score"];
         const radarData = radarCategories.map((cat) => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -116,7 +120,6 @@ export default function ResponseDisplay({ selectedModels, responses, selectedMet
         );
       }
       case "Response Speed & Efficiency": {
-        // Line Chart for latency across multiple prompts.
         const prompts = ["1", "2", "3"];
         const lineData = prompts.map((prompt) => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -139,7 +142,6 @@ export default function ResponseDisplay({ selectedModels, responses, selectedMet
         );
       }
       case "Sentiment & Tone Consistency": {
-        // Sentiment Polarity Heatmap represented as a table.
         return (
           <table className="min-w-full text-sm border">
             <thead>
@@ -160,7 +162,6 @@ export default function ResponseDisplay({ selectedModels, responses, selectedMet
         );
       }
       case "Context Retention & Multi-turn Coherence": {
-        // Heatmap as a table showing context retention.
         return (
           <table className="min-w-full text-sm border">
             <thead>
@@ -181,7 +182,6 @@ export default function ResponseDisplay({ selectedModels, responses, selectedMet
         );
       }
       case "Hallucination Detection": {
-        // Error Rate Bar Chart.
         const errorData = selectedModels.map((model) => ({
           name: model,
           errorRate: getDummyScore("Error", model)
@@ -197,7 +197,6 @@ export default function ResponseDisplay({ selectedModels, responses, selectedMet
         );
       }
       case "Intent Recognition & Routing": {
-        // Confusion Matrix represented as a table with two dummy intents.
         return (
           <table className="min-w-full text-sm border">
             <thead>
@@ -222,7 +221,6 @@ export default function ResponseDisplay({ selectedModels, responses, selectedMet
         );
       }
       case "Personalization & Customer Recognition": {
-        // Personalization accuracy as a heatmap table.
         return (
           <table className="min-w-full text-sm border">
             <thead>
@@ -243,7 +241,6 @@ export default function ResponseDisplay({ selectedModels, responses, selectedMet
         );
       }
       case "Compliance & Security": {
-        // Pie Chart for PII leakage.
         const pieData = selectedModels.map((model) => ({
           name: model,
           value: getDummyScore("PII", model)
@@ -260,7 +257,6 @@ export default function ResponseDisplay({ selectedModels, responses, selectedMet
         );
       }
       case "Escalation Handling": {
-        // Stacked Bar Chart for escalation handling.
         const escalationData = selectedModels.map((model) => ({
           name: model,
           correct: getDummyScore("EscalationCorrect", model),
@@ -278,7 +274,6 @@ export default function ResponseDisplay({ selectedModels, responses, selectedMet
         );
       }
       case "Language & Accent Understanding": {
-        // WER Heatmap as a table.
         return (
           <table className="min-w-full text-sm border">
             <thead>
@@ -299,7 +294,6 @@ export default function ResponseDisplay({ selectedModels, responses, selectedMet
         );
       }
       case "Handling Interruptions & Corrections": {
-        // Stacked Bar Chart for correction success rate.
         const correctionData = selectedModels.map((model) => ({
           name: model,
           success: getDummyScore("InterruptSuccess", model),
@@ -317,7 +311,6 @@ export default function ResponseDisplay({ selectedModels, responses, selectedMet
         );
       }
       case "Handling Noisy Input (ASR Evaluation)": {
-        // WER Table for different noise levels.
         const noiseLevels = ["Low", "High"];
         return (
           <table className="min-w-full text-sm border">
@@ -345,7 +338,6 @@ export default function ResponseDisplay({ selectedModels, responses, selectedMet
         );
       }
       case "Query Complexity Handling": {
-        // Scatter Plot for performance on simple vs. complex queries.
         const scatterData: { complexity: number }[] = [
           { complexity: 1 },
           { complexity: 2 },
@@ -370,7 +362,6 @@ export default function ResponseDisplay({ selectedModels, responses, selectedMet
         );
       }
       case "Emotional Intelligence & Empathy": {
-        // Sentiment Heatmap for empathy as a table.
         return (
           <table className="min-w-full text-sm border">
             <thead>
@@ -391,7 +382,6 @@ export default function ResponseDisplay({ selectedModels, responses, selectedMet
         );
       }
       case "Conversational Flow & Engagement": {
-        // Bar Chart for coherence scores.
         const engagementData = selectedModels.map((model) => ({
           name: model,
           coherence: getDummyScore("Coherence", model)
@@ -432,6 +422,31 @@ export default function ResponseDisplay({ selectedModels, responses, selectedMet
         className="p-6 bg-gray-100 h-full w-full flex flex-col"
       >
         <h3 className="text-2xl font-semibold mb-4 text-center">Model Comparison Metrics</h3>
+        {/* Collapsible Model Responses Section */}
+        <div className="mb-6 bg-gray-100 rounded-lg shadow">
+          <div
+            className="flex justify-between items-center p-4 cursor-pointer bg-whitesmoke rounded-t-lg"
+            onClick={() => setResponsesOpen(!responsesOpen)}
+          >
+            <h4 className="text-lg font-semibold">Model Responses</h4>
+            {responsesOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+          </div>
+          <motion.div
+            initial={{ height: "auto" }}
+            animate={{ height: responsesOpen ? "auto" : 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="overflow-hidden"
+          >
+            <div className="space-y-2 p-4">
+              {selectedModels.map((model) => (
+                <div key={model} className="p-2 bg-white rounded shadow text-sm">
+                  <strong>{model}:</strong> {responses[model] || "No response available."}
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+        {/* Visualization Grid */}
         <div className="overflow-auto flex-grow">
           <div className="grid grid-cols-1 gap-8">
             {metricsToDisplay.length > 0 ? (
