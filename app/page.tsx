@@ -69,7 +69,7 @@ export default function Home() {
   const handleEnter = () => {
     setSelectedModels([defaultModel, comparisonModel, ...additionalModels]);
     setShowResponses(true);
-    setMetricsOpen(false); // Collapse metrics on Enter
+    setMetricsOpen(false);
   };
 
   const toggleMetric = (metric: string) => {
@@ -95,26 +95,25 @@ export default function Home() {
 
         {/* Model Selection */}
         <div className="flex flex-wrap gap-4 mb-6">
-        <Select
-  onValueChange={(value) => {
-    setDefaultModel(value);
-  }}
-  defaultValue={defaultModel}
->
-  <SelectTrigger className="w-1/3">
-    <SelectValue placeholder="Select a model">
-      {defaultModel} (Default)
-    </SelectValue>
-  </SelectTrigger>
-  <SelectContent>
-    {models.map((model) => (
-      <SelectItem key={model} value={model}>
-        {model} {model === defaultModel ? "(Default)" : ""}
-      </SelectItem>
-    ))}
-  </SelectContent>
-</Select>
-
+          <Select
+            onValueChange={(value) => {
+              setDefaultModel(value);
+            }}
+            defaultValue={defaultModel}
+          >
+            <SelectTrigger className="w-1/3">
+              <SelectValue placeholder="Select a model">
+                {defaultModel} (Default)
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {models.map((model) => (
+                <SelectItem key={model} value={model}>
+                  {model} {model === defaultModel ? "(Default)" : ""}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           <Select
             onValueChange={setComparisonModel}
@@ -232,7 +231,8 @@ export default function Home() {
             <div className="overflow-auto flex-grow">
               {selectedModels.map((model) => (
                 <div key={model} className="p-3 mb-2 bg-gray-300 rounded-lg">
-                  <strong>{model}:</strong> {responses[model] || "No response available."}
+                  <strong>{model}:</strong>{" "}
+                  {responses[model] || "No response available."}
                 </div>
               ))}
             </div>
