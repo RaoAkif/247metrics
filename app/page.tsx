@@ -13,16 +13,7 @@ import { motion } from "framer-motion";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 export default function Home() {
-  const [defaultModel, setDefaultModel] = useState<string>("OpenAI 4o-mini");
-  const [comparisonModel, setComparisonModel] = useState<string>("Gemini");
-  const [additionalModels, setAdditionalModels] = useState<string[]>([]);
-  const [inputValue, setInputValue] = useState<string>("");
-  const [showResponses, setShowResponses] = useState<boolean>(false);
-  const [selectedModels, setSelectedModels] = useState<string[]>([]);
-  const [selectedMetrics, setSelectedMetrics] = useState<string[]>([]);
-  const [metricsOpen, setMetricsOpen] = useState<boolean>(true); // Collapsible state
-
-  const models: string[] = [
+  const initialModels: string[] = [
     "OpenAI 4o-mini",
     "Gemini",
     "Gemma",
@@ -30,12 +21,28 @@ export default function Home() {
     "DeepSeek",
   ];
 
-  const responses: Record<string, string> = {
-    "OpenAI 4o-mini": "This is a response from OpenAI 4o-mini.",
-    Gemini: "This is a response from Gemini.",
-    Gemma: "This is a response from Gemma.",
-    Llama: "This is a response from Llama.",
-    DeepSeek: "This is a response from DeepSeek.",
+  const [defaultModel, setDefaultModel] = useState<string>("OpenAI 4o-mini");
+  const [comparisonModel, setComparisonModel] = useState<string>("");
+  const [additionalModels, setAdditionalModels] = useState<string[]>([]);
+  const [inputValue, setInputValue] = useState<string>("");
+  const [showResponses, setShowResponses] = useState<boolean>(false);
+  const [selectedModels, setSelectedModels] = useState<string[]>([]);
+  const [selectedMetrics, setSelectedMetrics] = useState<string[]>([]);
+  const [metricsOpen, setMetricsOpen] = useState<boolean>(true);
+  
+  const responses: { [key: string]: string } = {
+    "OpenAI 4o-mini": "Response from OpenAI 4o-mini",
+    "Gemini": "Response from Gemini",
+    "Gemma": "Response from Gemma",
+    "Llama": "Response from Llama",
+    "DeepSeek": "Response from DeepSeek",
+  };
+
+  // Reset models when default model is changed
+  const handleDefaultModelChange = (value: string) => {
+    setDefaultModel(value);
+    setComparisonModel("");
+    setAdditionalModels([]);
   };
 
   const evaluationMetrics: string[] = [
@@ -56,6 +63,10 @@ export default function Home() {
     "Conversational Flow & Engagement",
   ];
 
+  // Get available models for selection (excluding selected ones)
+  const getAvailableModels = (excludeModels: string[]) =>
+    initialModels.filter((model) => !excludeModels.includes(model));
+
   const handleAddModel = () => {
     setAdditionalModels([...additionalModels, ""]);
   };
@@ -67,7 +78,7 @@ export default function Home() {
   };
 
   const handleEnter = () => {
-    setSelectedModels([defaultModel, comparisonModel, ...additionalModels]);
+    setSelectedModels([defaultModel, comparisonModel, ...additionalModels].filter(Boolean));
     setShowResponses(true);
     setMetricsOpen(false);
   };
@@ -82,7 +93,6 @@ export default function Home() {
 
   return (
     <div className="h-screen flex w-full">
-      {/* Compare Models Section - Shrinking */}
       <motion.div
         initial={{ flex: 1 }}
         animate={{ flex: showResponses ? 0.5 : 1 }}
@@ -95,19 +105,12 @@ export default function Home() {
 
         {/* Model Selection */}
         <div className="flex flex-wrap gap-4 mb-6">
-          <Select
-            onValueChange={(value) => {
-              setDefaultModel(value);
-            }}
-            defaultValue={defaultModel}
-          >
+          <Select onValueChange={handleDefaultModelChange} defaultValue={defaultModel}>
             <SelectTrigger className="w-1/3">
-              <SelectValue placeholder="Select a model">
-                {defaultModel} (Default)
-              </SelectValue>
+              <SelectValue>{defaultModel} (Default)</SelectValue>
             </SelectTrigger>
             <SelectContent>
-              {models.map((model) => (
+              {initialModels.map((model) => (
                 <SelectItem key={model} value={model}>
                   {model} {model === defaultModel ? "(Default)" : ""}
                 </SelectItem>
@@ -118,29 +121,32 @@ export default function Home() {
           <Select
             onValueChange={setComparisonModel}
             defaultValue={comparisonModel}
+            disabled={!defaultModel}
           >
             <SelectTrigger className="w-1/3">
               <SelectValue placeholder="Select a model" />
             </SelectTrigger>
             <SelectContent>
-              {models.map((model) => (
+              {getAvailableModels([defaultModel]).map((model) => (
                 <SelectItem key={model} value={model}>
                   {model}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
+
           {additionalModels.map((model, index) => (
             <Select
               key={index}
               onValueChange={(value) => handleModelChange(index, value)}
               defaultValue={model}
+              disabled={!comparisonModel}
             >
               <SelectTrigger className="w-1/3">
                 <SelectValue placeholder="Select a model" />
               </SelectTrigger>
               <SelectContent>
-                {models.map((model) => (
+                {getAvailableModels([defaultModel, comparisonModel, ...additionalModels]).map((model) => (
                   <SelectItem key={model} value={model}>
                     {model}
                   </SelectItem>
@@ -148,9 +154,11 @@ export default function Home() {
               </SelectContent>
             </Select>
           ))}
+
           <Button
             className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
             onClick={handleAddModel}
+            disabled={!comparisonModel || additionalModels.length >= initialModels.length - 2}
           >
             Add Model
           </Button>
