@@ -95,18 +95,27 @@ export default function Home() {
 
         {/* Model Selection */}
         <div className="flex flex-wrap gap-4 mb-6">
-          <Select onValueChange={setDefaultModel} defaultValue={defaultModel}>
-            <SelectTrigger className="w-1/3">
-              <SelectValue placeholder="Select a model" />
-            </SelectTrigger>
-            <SelectContent>
-              {models.map((model) => (
-                <SelectItem key={model} value={model}>
-                  {model}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <Select
+  onValueChange={(value) => {
+    setDefaultModel(value);
+  }}
+  defaultValue={defaultModel}
+>
+  <SelectTrigger className="w-1/3">
+    <SelectValue placeholder="Select a model">
+      {defaultModel} (Default)
+    </SelectValue>
+  </SelectTrigger>
+  <SelectContent>
+    {models.map((model) => (
+      <SelectItem key={model} value={model}>
+        {model} {model === defaultModel ? "(Default)" : ""}
+      </SelectItem>
+    ))}
+  </SelectContent>
+</Select>
+
+
           <Select
             onValueChange={setComparisonModel}
             defaultValue={comparisonModel}
