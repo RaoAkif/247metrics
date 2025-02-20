@@ -40,7 +40,7 @@ export default function Home() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
       <div className="flex w-full max-w-5xl gap-0 mt-20">
-        {/* Compare Models Section - Shrinks when responses appear */}
+        {/* Compare Models Section */}
         <motion.div
           initial={{ width: "100%" }}
           animate={{ width: showResponses ? "calc(50% - 5px)" : "100%" }}
@@ -104,23 +104,26 @@ export default function Home() {
           </div>
         </motion.div>
 
-        {/* Divider */}
-        {showResponses && <div className="w-[10px] bg-gray-400" />}
-
-        {/* Responses Section - Appears from Right */}
+        {/* Divider & Responses Section - Move in together */}
         {showResponses && (
           <motion.div
             initial={{ x: "100%", opacity: 0 }}
             animate={{ x: "0%", opacity: 1 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            className="p-6 bg-gray-200 w-[calc(50%-5px)]"
+            className="flex"
           >
-            <h3 className="text-2xl font-semibold mb-4 text-center">Responses</h3>
-            {selectedModels.map((model) => (
-              <div key={model} className="p-3 mb-2 bg-gray-300 rounded-lg">
-                <strong>{model}:</strong> {responses[model] || "No response available."}
-              </div>
-            ))}
+            {/* Divider (slides in together with Responses) */}
+            <div className="w-[10px] bg-gray-400" />
+
+            {/* Responses Section */}
+            <div className="p-6 bg-gray-200 w-[calc(50%-5px)]">
+              <h3 className="text-2xl font-semibold mb-4 text-center">Responses</h3>
+              {selectedModels.map((model) => (
+                <div key={model} className="p-3 mb-2 bg-gray-300 rounded-lg">
+                  <strong>{model}:</strong> {responses[model] || "No response available."}
+                </div>
+              ))}
+            </div>
           </motion.div>
         )}
       </div>
