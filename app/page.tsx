@@ -33,6 +33,7 @@ export default function Home() {
     DeepSeek: "Response from DeepSeek",
   };
 
+  // The evaluationMetrics names as they appear in the checkboxes.
   const evaluationMetrics: string[] = [
     "Accuracy of Responses",
     "Response Time (Latency)",
@@ -109,9 +110,13 @@ export default function Home() {
         </div>
       </motion.div>
 
-      {/* Divider & Responses Section - Expanding */}
+      {/* Divider & Responses Section */}
       {showResponses && (
-        <ResponseDisplay selectedModels={selectedModels} responses={responses} />
+        <ResponseDisplay
+          selectedModels={selectedModels}
+          responses={responses}
+          selectedMetrics={selectedMetrics}
+        />
       )}
     </div>
   );

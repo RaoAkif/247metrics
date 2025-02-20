@@ -21,13 +21,33 @@ import {
 } from "recharts";
 
 interface ResponseDisplayProps {
-  selectedModels: string[]; // e.g. ["Model A", "Model B"]
-  responses?: { [key: string]: string };
+  selectedModels: string[];
+  responses: { [key: string]: string };
+  selectedMetrics: string[];
 }
 
-export default function ResponseDisplay({ selectedModels }: ResponseDisplayProps) {
-  // List of 15 metrics (names must match those in our renderChart switch cases)
-  const metrics = [
+export default function ResponseDisplay({ selectedModels, responses, selectedMetrics }: ResponseDisplayProps) {
+  // Mapping from evaluation metric names (from Home) to the internal names used below.
+  const metricMapping: { [key: string]: string } = {
+    "Accuracy of Responses": "Accuracy & Relevance (Factuality)",
+    "Response Time (Latency)": "Response Speed & Efficiency",
+    "Sentiment & Tone Alignment": "Sentiment & Tone Consistency",
+    "Context Retention (Multi-turn Conversations)": "Context Retention & Multi-turn Coherence",
+    "Hallucination Detection": "Hallucination Detection",
+    "Intent Recognition & Routing": "Intent Recognition & Routing",
+    "Personalization & Customer Recognition": "Personalization & Customer Recognition",
+    "Compliance & Security": "Compliance & Security",
+    "Escalation Handling": "Escalation Handling",
+    "Language & Accent Understanding": "Language & Accent Understanding",
+    "Handling Interruptions & Corrections": "Handling Interruptions & Corrections",
+    "Handling Noisy Input (Speech-to-Text Evaluation)": "Handling Noisy Input (ASR Evaluation)",
+    "Query Complexity Handling": "Query Complexity Handling",
+    "Emotional Intelligence & Empathy": "Emotional Intelligence & Empathy",
+    "Conversational Flow & Engagement": "Conversational Flow & Engagement"
+  };
+
+  // All internal metrics with corresponding visualizations.
+  const allMetrics = [
     "Accuracy & Relevance (Factuality)",
     "Response Speed & Efficiency",
     "Sentiment & Tone Consistency",
@@ -45,11 +65,21 @@ export default function ResponseDisplay({ selectedModels }: ResponseDisplayProps
     "Conversational Flow & Engagement"
   ];
 
-  // Render a chart for a given metric based on its best visualization type.
+  // Convert the selected metrics from Home to our internal names
+  const internalSelectedMetrics = selectedMetrics
+    .map((m) => metricMapping[m])
+    .filter(Boolean);
+
+  // Only show visualizations for the selected metrics.
+  const metricsToDisplay = allMetrics.filter((metric) =>
+    internalSelectedMetrics.includes(metric)
+  );
+
+  // Render the appropriate chart based on the metric name.
   function renderChart(metricName: string) {
     switch (metricName) {
       case "Accuracy & Relevance (Factuality)": {
-        // Dummy radar chart for multi-metric comparison (Semantic Similarity, Exact Match, Knowledge Score)
+        // Dummy radar chart for Semantic Similarity, Exact Match, Knowledge Score
         const radarData = [
           { metric: "Semantic Similarity", ModelA: 80, ModelB: 75 },
           { metric: "Exact Match", ModelA: 85, ModelB: 80 },
@@ -117,7 +147,7 @@ export default function ResponseDisplay({ selectedModels }: ResponseDisplayProps
         );
       }
       case "Intent Recognition & Routing": {
-        // Dummy confusion matrix rendered as a simple table
+        // Dummy confusion matrix as a simple table
         return (
           <table className="min-w-full text-sm border">
             <thead>
@@ -159,7 +189,7 @@ export default function ResponseDisplay({ selectedModels }: ResponseDisplayProps
         const COLORS = ["#0088FE", "#00C49F"];
         return (
           <PieChart width={300} height={250}>
-            <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={60} fill="#8884d8">
+            <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={60}>
               {pieData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
@@ -169,7 +199,7 @@ export default function ResponseDisplay({ selectedModels }: ResponseDisplayProps
         );
       }
       case "Escalation Handling": {
-        // Dummy stacked bar chart for escalation handling (correct vs. false escalations)
+        // Dummy stacked bar chart for escalation handling
         const escalationData = [
           { name: "Model A", correct: 80, false: 20 },
           { name: "Model B", correct: 75, false: 25 }
@@ -211,7 +241,7 @@ export default function ResponseDisplay({ selectedModels }: ResponseDisplayProps
         );
       }
       case "Handling Noisy Input (ASR Evaluation)": {
-        // Dummy WER table rendered as a simple table
+        // Dummy WER table
         return (
           <table className="min-w-full text-sm border">
             <thead>
@@ -290,7 +320,7 @@ export default function ResponseDisplay({ selectedModels }: ResponseDisplayProps
       transition={{ duration: 0.7, ease: "easeInOut" }}
       className="h-full flex"
     >
-      {/* Vertical divider remains unchanged */}
+      {/* Vertical divider */}
       <motion.div
         initial={{ width: 0, opacity: 0 }}
         animate={{ width: "10px", opacity: 1 }}
@@ -305,14 +335,18 @@ export default function ResponseDisplay({ selectedModels }: ResponseDisplayProps
       >
         <h3 className="text-2xl font-semibold mb-4 text-center">Model Comparison Metrics</h3>
         <div className="overflow-auto flex-grow">
-          {/* One-column grid: each metric (with its chart) appears on its own row */}
+          {/* Each selected metric's chart appears in its own row */}
           <div className="grid grid-cols-1 gap-8">
-            {metrics.map((metric) => (
-              <div key={metric} className="p-4 bg-white rounded shadow flex flex-col items-center">
-                <h4 className="font-bold mb-2">{metric}</h4>
-                {renderChart(metric)}
-              </div>
-            ))}
+            {metricsToDisplay.length > 0 ? (
+              metricsToDisplay.map((metric) => (
+                <div key={metric} className="p-4 bg-white rounded shadow flex flex-col items-center">
+                  <h4 className="font-bold mb-2">{metric}</h4>
+                  {renderChart(metric)}
+                </div>
+              ))
+            ) : (
+              <div className="text-center text-gray-500">No evaluation metrics selected.</div>
+            )}
           </div>
         </div>
       </motion.div>
