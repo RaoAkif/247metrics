@@ -40,10 +40,10 @@ export default function Home() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
       <div className="flex w-full max-w-5xl gap-0 mt-20">
-        {/* Compare Models Section */}
+        {/* Compare Models Section - Shrinking */}
         <motion.div
-          initial={{ width: "100%" }}
-          animate={{ width: showResponses ? "calc(50% - 5px)" : "100%" }}
+          initial={{ flex: 1 }}
+          animate={{ flex: showResponses ? 0.5 : 1 }}
           transition={{ duration: 0.5, ease: "easeInOut" }}
           className="p-6 bg-gray-100"
         >
@@ -104,19 +104,24 @@ export default function Home() {
           </div>
         </motion.div>
 
-        {/* Divider & Responses Section - Move in together */}
+        {/* Divider & Responses Section - Expanding */}
         {showResponses && (
           <motion.div
-            initial={{ x: "100%", opacity: 0 }}
-            animate={{ x: "0%", opacity: 1 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+            initial={{ flex: 0 }}
+            animate={{ flex: 0.5 }}
+            transition={{ duration: 0.5, ease: "easeInOut" }}
             className="flex"
           >
-            {/* Divider (slides in together with Responses) */}
-            <div className="w-[10px] bg-gray-400" />
+            {/* Divider */}
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: "10px" }}
+              transition={{ duration: 0.5, ease: "easeInOut" }}
+              className="bg-gray-400"
+            />
 
             {/* Responses Section */}
-            <div className="p-6 bg-gray-200 w-[calc(50%-5px)]">
+            <div className="p-6 bg-gray-200 w-full">
               <h3 className="text-2xl font-semibold mb-4 text-center">Responses</h3>
               {selectedModels.map((model) => (
                 <div key={model} className="p-3 mb-2 bg-gray-300 rounded-lg">
