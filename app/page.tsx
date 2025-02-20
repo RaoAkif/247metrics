@@ -113,7 +113,7 @@ export default function Home() {
             defaultValue={defaultModel}
           >
             <SelectTrigger className="w-1/3 text-black">
-              <SelectValue>{defaultModel} (Default)</SelectValue>
+              <SelectValue placeholder="Select a model">{defaultModel} (Default)</SelectValue>
             </SelectTrigger>
             <SelectContent>
               {initialModels.map((model) => (
@@ -132,7 +132,7 @@ export default function Home() {
             disabled={!defaultModel}
           >
             <SelectTrigger className="w-1/3 text-black">
-              <SelectValue>{comparisonModel || "Select a model"}</SelectValue>
+              <SelectValue placeholder="Select a model">{comparisonModel || "Select a model"}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               {getAvailableModels([defaultModel]).map((model) => (
@@ -152,7 +152,7 @@ export default function Home() {
               disabled={!comparisonModel}
             >
               <SelectTrigger className="w-1/3 text-black">
-                <SelectValue>{model || "Select a model"}</SelectValue>
+                <SelectValue placeholder="Select a model">{model || "Select a model"}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {getAvailableModels([
