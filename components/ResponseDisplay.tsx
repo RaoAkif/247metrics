@@ -27,7 +27,7 @@ interface ResponseDisplayProps {
 }
 
 export default function ResponseDisplay({ selectedModels, responses, selectedMetrics }: ResponseDisplayProps) {
-  // Mapping from evaluation metric names (from Home) to the internal names used below.
+  // Map the evaluation metric names (from Home) to the internal ones used below.
   const metricMapping: { [key: string]: string } = {
     "Accuracy of Responses": "Accuracy & Relevance (Factuality)",
     "Response Time (Latency)": "Response Speed & Efficiency",
@@ -46,7 +46,6 @@ export default function ResponseDisplay({ selectedModels, responses, selectedMet
     "Conversational Flow & Engagement": "Conversational Flow & Engagement"
   };
 
-  // All internal metrics with corresponding visualizations.
   const allMetrics = [
     "Accuracy & Relevance (Factuality)",
     "Response Speed & Efficiency",
@@ -65,77 +64,128 @@ export default function ResponseDisplay({ selectedModels, responses, selectedMet
     "Conversational Flow & Engagement"
   ];
 
-  // Convert the selected metrics from Home to our internal names
+  // Convert selected evaluation metrics (from checkboxes) into our internal names.
   const internalSelectedMetrics = selectedMetrics
     .map((m) => metricMapping[m])
     .filter(Boolean);
-
-  // Only show visualizations for the selected metrics.
   const metricsToDisplay = allMetrics.filter((metric) =>
     internalSelectedMetrics.includes(metric)
   );
 
-  // Render the appropriate chart based on the metric name.
+  // Helper: generate a dummy score based on a category and model name.
+  const getDummyScore = (category: string, model: string) => {
+    const base = model.charCodeAt(0);
+    const catFactor = category.length;
+    return Math.floor(((base + catFactor) % 50) + 50); // yields a value between 50 and 99
+  };
+
+  // Colors for chart elements
+  const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff7300", "#0088FE", "#00C49F"];
+
+  // Render a visualization based on the metric name.
   function renderChart(metricName: string) {
     switch (metricName) {
       case "Accuracy & Relevance (Factuality)": {
-        // Dummy radar chart for Semantic Similarity, Exact Match, Knowledge Score
-        const radarData = [
-          { metric: "Semantic Similarity", ModelA: 80, ModelB: 75 },
-          { metric: "Exact Match", ModelA: 85, ModelB: 80 },
-          { metric: "Knowledge Score", ModelA: 90, ModelB: 85 }
-        ];
+        // Radar Chart: comparing three sub-categories.
+        const radarCategories = ["Semantic Similarity", "Exact Match", "Knowledge Score"];
+        const radarData = radarCategories.map((cat) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const dataPoint: any = { metric: cat };
+          selectedModels.forEach((model) => {
+            dataPoint[model] = getDummyScore(cat, model);
+          });
+          return dataPoint;
+        });
         return (
           <RadarChart outerRadius={60} width={300} height={250} data={radarData}>
             <PolarGrid />
             <PolarAngleAxis dataKey="metric" />
             <PolarRadiusAxis angle={30} domain={[0, 100]} />
-            <Radar name="Model A" dataKey="ModelA" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
-            <Radar name="Model B" dataKey="ModelB" stroke="#82ca9d" fill="#82ca9d" fillOpacity={0.6} />
+            {selectedModels.map((model, index) => (
+              <Radar
+                key={model}
+                name={model}
+                dataKey={model}
+                stroke={colors[index % colors.length]}
+                fill={colors[index % colors.length]}
+                fillOpacity={0.6}
+              />
+            ))}
             <Tooltip />
           </RadarChart>
         );
       }
       case "Response Speed & Efficiency": {
-        // Dummy line chart for latency over multiple prompts
-        const lineData = [
-          { prompt: "1", ModelA: 100, ModelB: 110 },
-          { prompt: "2", ModelA: 95, ModelB: 105 },
-          { prompt: "3", ModelA: 98, ModelB: 108 }
-        ];
+        // Line Chart for latency across multiple prompts.
+        const prompts = ["1", "2", "3"];
+        const lineData = prompts.map((prompt) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const dataPoint: any = { prompt };
+          selectedModels.forEach((model) => {
+            dataPoint[model] = getDummyScore("Latency", model) + parseInt(prompt) * 2;
+          });
+          return dataPoint;
+        });
         return (
           <LineChart width={300} height={250} data={lineData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="prompt" />
             <YAxis domain={[0, 150]} />
             <Tooltip />
-            <Line type="monotone" dataKey="ModelA" stroke="#8884d8" />
-            <Line type="monotone" dataKey="ModelB" stroke="#82ca9d" />
+            {selectedModels.map((model, index) => (
+              <Line key={model} type="monotone" dataKey={model} stroke={colors[index % colors.length]} />
+            ))}
           </LineChart>
         );
       }
       case "Sentiment & Tone Consistency": {
-        // Dummy sentiment polarity heatmap
+        // Sentiment Polarity Heatmap represented as a table.
         return (
-          <div className="w-64 h-32 flex items-center justify-center bg-gradient-to-r from-green-200 to-red-200">
-            Sentiment Polarity Heatmap
-          </div>
+          <table className="min-w-full text-sm border">
+            <thead>
+              <tr>
+                <th className="border px-2 py-1">Model</th>
+                <th className="border px-2 py-1">Sentiment (%)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {selectedModels.map((model) => (
+                <tr key={model}>
+                  <td className="border px-2 py-1">{model}</td>
+                  <td className="border px-2 py-1">{getDummyScore("Sentiment", model)}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         );
       }
       case "Context Retention & Multi-turn Coherence": {
-        // Dummy heatmap for context retention
+        // Heatmap as a table showing context retention.
         return (
-          <div className="w-64 h-32 flex items-center justify-center bg-gradient-to-r from-blue-200 to-purple-200">
-            Context Retention Heatmap
-          </div>
+          <table className="min-w-full text-sm border">
+            <thead>
+              <tr>
+                <th className="border px-2 py-1">Model</th>
+                <th className="border px-2 py-1">Retention (%)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {selectedModels.map((model) => (
+                <tr key={model}>
+                  <td className="border px-2 py-1">{model}</td>
+                  <td className="border px-2 py-1">{getDummyScore("Context", model)}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         );
       }
       case "Hallucination Detection": {
-        // Dummy error rate bar chart
-        const errorData = [
-          { name: "Model A", errorRate: 5 },
-          { name: "Model B", errorRate: 8 }
-        ];
+        // Error Rate Bar Chart.
+        const errorData = selectedModels.map((model) => ({
+          name: model,
+          errorRate: getDummyScore("Error", model)
+        }));
         return (
           <BarChart width={300} height={250} data={errorData}>
             <CartesianGrid strokeDasharray="3 3" />
@@ -147,51 +197,62 @@ export default function ResponseDisplay({ selectedModels, responses, selectedMet
         );
       }
       case "Intent Recognition & Routing": {
-        // Dummy confusion matrix as a simple table
+        // Confusion Matrix represented as a table with two dummy intents.
         return (
           <table className="min-w-full text-sm border">
             <thead>
               <tr>
                 <th className="border px-2 py-1">Intent</th>
-                <th className="border px-2 py-1">Model A</th>
-                <th className="border px-2 py-1">Model B</th>
+                {selectedModels.map((model) => (
+                  <th key={model} className="border px-2 py-1">{model}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td className="border px-2 py-1">Intent 1</td>
-                <td className="border px-2 py-1">80%</td>
-                <td className="border px-2 py-1">75%</td>
-              </tr>
-              <tr>
-                <td className="border px-2 py-1">Intent 2</td>
-                <td className="border px-2 py-1">85%</td>
-                <td className="border px-2 py-1">80%</td>
-              </tr>
+              {["Intent 1", "Intent 2"].map((intent) => (
+                <tr key={intent}>
+                  <td className="border px-2 py-1">{intent}</td>
+                  {selectedModels.map((model) => (
+                    <td key={model} className="border px-2 py-1">{getDummyScore(intent, model)}%</td>
+                  ))}
+                </tr>
+              ))}
             </tbody>
           </table>
         );
       }
       case "Personalization & Customer Recognition": {
-        // Dummy heatmap for personalization accuracy
+        // Personalization accuracy as a heatmap table.
         return (
-          <div className="w-64 h-32 flex items-center justify-center bg-gradient-to-r from-yellow-200 to-red-200">
-            Personalization Accuracy Heatmap
-          </div>
+          <table className="min-w-full text-sm border">
+            <thead>
+              <tr>
+                <th className="border px-2 py-1">Model</th>
+                <th className="border px-2 py-1">Accuracy (%)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {selectedModels.map((model) => (
+                <tr key={model}>
+                  <td className="border px-2 py-1">{model}</td>
+                  <td className="border px-2 py-1">{getDummyScore("Personalization", model)}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         );
       }
       case "Compliance & Security": {
-        // Dummy pie chart for PII leakage percentage
-        const pieData = [
-          { name: "Model A", value: 3 },
-          { name: "Model B", value: 5 }
-        ];
-        const COLORS = ["#0088FE", "#00C49F"];
+        // Pie Chart for PII leakage.
+        const pieData = selectedModels.map((model) => ({
+          name: model,
+          value: getDummyScore("PII", model)
+        }));
         return (
           <PieChart width={300} height={250}>
             <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={60}>
               {pieData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
               ))}
             </Pie>
             <Tooltip />
@@ -199,11 +260,12 @@ export default function ResponseDisplay({ selectedModels, responses, selectedMet
         );
       }
       case "Escalation Handling": {
-        // Dummy stacked bar chart for escalation handling
-        const escalationData = [
-          { name: "Model A", correct: 80, false: 20 },
-          { name: "Model B", correct: 75, false: 25 }
-        ];
+        // Stacked Bar Chart for escalation handling.
+        const escalationData = selectedModels.map((model) => ({
+          name: model,
+          correct: getDummyScore("EscalationCorrect", model),
+          false: getDummyScore("EscalationFalse", model)
+        }));
         return (
           <BarChart width={300} height={250} data={escalationData}>
             <CartesianGrid strokeDasharray="3 3" />
@@ -216,19 +278,33 @@ export default function ResponseDisplay({ selectedModels, responses, selectedMet
         );
       }
       case "Language & Accent Understanding": {
-        // Dummy WER heatmap
+        // WER Heatmap as a table.
         return (
-          <div className="w-64 h-32 flex items-center justify-center bg-gradient-to-r from-purple-200 to-pink-200">
-            WER Heatmap
-          </div>
+          <table className="min-w-full text-sm border">
+            <thead>
+              <tr>
+                <th className="border px-2 py-1">Model</th>
+                <th className="border px-2 py-1">WER (%)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {selectedModels.map((model) => (
+                <tr key={model}>
+                  <td className="border px-2 py-1">{model}</td>
+                  <td className="border px-2 py-1">{getDummyScore("WER", model)}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         );
       }
       case "Handling Interruptions & Corrections": {
-        // Dummy stacked bar chart for correction success rate
-        const correctionData = [
-          { name: "Model A", success: 85, failure: 15 },
-          { name: "Model B", success: 80, failure: 20 }
-        ];
+        // Stacked Bar Chart for correction success rate.
+        const correctionData = selectedModels.map((model) => ({
+          name: model,
+          success: getDummyScore("InterruptSuccess", model),
+          failure: getDummyScore("InterruptFailure", model)
+        }));
         return (
           <BarChart width={300} height={250} data={correctionData}>
             <CartesianGrid strokeDasharray="3 3" />
@@ -241,70 +317,92 @@ export default function ResponseDisplay({ selectedModels, responses, selectedMet
         );
       }
       case "Handling Noisy Input (ASR Evaluation)": {
-        // Dummy WER table
+        // WER Table for different noise levels.
+        const noiseLevels = ["Low", "High"];
         return (
           <table className="min-w-full text-sm border">
             <thead>
               <tr>
                 <th className="border px-2 py-1">Noise Level</th>
-                <th className="border px-2 py-1">Model A WER</th>
-                <th className="border px-2 py-1">Model B WER</th>
+                {selectedModels.map((model) => (
+                  <th key={model} className="border px-2 py-1">{model} WER</th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td className="border px-2 py-1">Low</td>
-                <td className="border px-2 py-1">10%</td>
-                <td className="border px-2 py-1">12%</td>
-              </tr>
-              <tr>
-                <td className="border px-2 py-1">High</td>
-                <td className="border px-2 py-1">20%</td>
-                <td className="border px-2 py-1">25%</td>
-              </tr>
+              {noiseLevels.map((level) => (
+                <tr key={level}>
+                  <td className="border px-2 py-1">{level}</td>
+                  {selectedModels.map((model) => (
+                    <td key={model} className="border px-2 py-1">
+                      {getDummyScore(`ASR ${level}`, model)}%
+                    </td>
+                  ))}
+                </tr>
+              ))}
             </tbody>
           </table>
         );
       }
       case "Query Complexity Handling": {
-        // Dummy scatter plot for performance on simple vs. complex queries
-        const scatterData = [
-          { complexity: 1, ModelA: 90, ModelB: 85 },
-          { complexity: 2, ModelA: 80, ModelB: 75 },
-          { complexity: 3, ModelA: 70, ModelB: 65 }
+        // Scatter Plot for performance on simple vs. complex queries.
+        const scatterData: { complexity: number }[] = [
+          { complexity: 1 },
+          { complexity: 2 },
+          { complexity: 3 }
         ];
         return (
           <ScatterChart width={300} height={250}>
             <CartesianGrid />
             <XAxis type="number" dataKey="complexity" name="Complexity" />
-            <YAxis type="number" dataKey="ModelA" name="ModelA" domain={[0, 100]} />
+            <YAxis type="number" domain={[0, 100]} />
             <Tooltip cursor={{ strokeDasharray: "3 3" }} />
-            <Scatter name="Model A" data={scatterData} fill="#8884d8" />
-            <Scatter name="Model B" data={scatterData} fill="#82ca9d" />
+            {selectedModels.map((model, index) => {
+              const data = scatterData.map((point) => ({
+                ...point,
+                value: getDummyScore("Complexity", model) + point.complexity * 2
+              }));
+              return (
+                <Scatter key={model} name={model} data={data} fill={colors[index % colors.length]} />
+              );
+            })}
           </ScatterChart>
         );
       }
       case "Emotional Intelligence & Empathy": {
-        // Dummy sentiment heatmap for empathy feedback
+        // Sentiment Heatmap for empathy as a table.
         return (
-          <div className="w-64 h-32 flex items-center justify-center bg-gradient-to-r from-green-200 to-blue-200">
-            Sentiment Heatmap
-          </div>
+          <table className="min-w-full text-sm border">
+            <thead>
+              <tr>
+                <th className="border px-2 py-1">Model</th>
+                <th className="border px-2 py-1">Empathy (%)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {selectedModels.map((model) => (
+                <tr key={model}>
+                  <td className="border px-2 py-1">{model}</td>
+                  <td className="border px-2 py-1">{getDummyScore("Empathy", model)}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         );
       }
       case "Conversational Flow & Engagement": {
-        // Dummy bar chart for coherence scores
-        const engagementData = [
-          { name: "Model A", coherence: 90 },
-          { name: "Model B", coherence: 85 }
-        ];
+        // Bar Chart for coherence scores.
+        const engagementData = selectedModels.map((model) => ({
+          name: model,
+          coherence: getDummyScore("Coherence", model)
+        }));
         return (
           <BarChart width={300} height={250} data={engagementData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
             <YAxis domain={[0, 100]} />
             <Tooltip />
-            <Bar dataKey="coherence" fill="#8884d8" />
+            <Bar dataKey="coherence" fill={colors[0]} />
           </BarChart>
         );
       }
@@ -320,7 +418,7 @@ export default function ResponseDisplay({ selectedModels, responses, selectedMet
       transition={{ duration: 0.7, ease: "easeInOut" }}
       className="h-full flex"
     >
-      {/* Vertical divider */}
+      {/* Vertical Divider */}
       <motion.div
         initial={{ width: 0, opacity: 0 }}
         animate={{ width: "10px", opacity: 1 }}
@@ -335,7 +433,6 @@ export default function ResponseDisplay({ selectedModels, responses, selectedMet
       >
         <h3 className="text-2xl font-semibold mb-4 text-center">Model Comparison Metrics</h3>
         <div className="overflow-auto flex-grow">
-          {/* Each selected metric's chart appears in its own row */}
           <div className="grid grid-cols-1 gap-8">
             {metricsToDisplay.length > 0 ? (
               metricsToDisplay.map((metric) => (
