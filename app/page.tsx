@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/select";
 import { motion } from "framer-motion";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import ModelSelection from "@/components/ModelSelection";
 
 export default function Home() {
   const initialModels: string[] = [
@@ -105,81 +106,16 @@ export default function Home() {
           Compare Models
         </h3>
 
-        {/* Model Selection */}
-        <div className="flex flex-wrap gap-4 mb-6">
-          {/* Default Model Selection */}
-          <Select
-            onValueChange={handleDefaultModelChange}
-            defaultValue={defaultModel}
-          >
-            <SelectTrigger className="w-1/3 text-black">
-              <SelectValue placeholder="Select a model">{defaultModel} (Default)</SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {initialModels.map((model) => (
-                <SelectItem key={model} value={model}>
-                  {model} {model === defaultModel ? "(Default)" : ""}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {/* Comparison Model Selection */}
-          <Select
-            key={comparisonModel} // Force re-render when value changes
-            onValueChange={setComparisonModel}
-            value={comparisonModel} // Bind selected value
-            disabled={!defaultModel}
-          >
-            <SelectTrigger className="w-1/3 text-black">
-              <SelectValue placeholder="Select a model">{comparisonModel || "Select a model"}</SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {getAvailableModels([defaultModel]).map((model) => (
-                <SelectItem key={model} value={model}>
-                  {model}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {/* Additional Model Selections */}
-          {additionalModels.map((model, index) => (
-            <Select
-              key={index} // Ensure unique re-render per model
-              onValueChange={(value) => handleModelChange(index, value)}
-              value={model} // Bind selected value
-              disabled={!comparisonModel}
-            >
-              <SelectTrigger className="w-1/3 text-black">
-                <SelectValue placeholder="Select a model">{model || "Select a model"}</SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {getAvailableModels([
-                  defaultModel,
-                  comparisonModel,
-                  ...additionalModels,
-                ]).map((availableModel) => (
-                  <SelectItem key={availableModel} value={availableModel}>
-                    {availableModel}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          ))}
-
-          {/* Add Model Button */}
-          <Button
-            className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
-            onClick={handleAddModel}
-            disabled={
-              !comparisonModel ||
-              additionalModels.length >= initialModels.length - 2
-            }
-          >
-            Add Model
-          </Button>
-        </div>
+        {/* Model Selection Component */}
+        <ModelSelection
+          initialModels={initialModels}
+          defaultModel={defaultModel}
+          comparisonModel={comparisonModel}
+          additionalModels={additionalModels}
+          setDefaultModel={setDefaultModel}
+          setComparisonModel={setComparisonModel}
+          setAdditionalModels={setAdditionalModels}
+        />
 
         {/* Collapsible Evaluation Metrics Section */}
         <div className="mb-6 bg-gray-100 rounded-lg shadow">
