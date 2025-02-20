@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { motion } from "framer-motion";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 export default function Home() {
   const [defaultModel, setDefaultModel] = useState("OpenAI 4o-mini");
@@ -13,6 +14,7 @@ export default function Home() {
   const [showResponses, setShowResponses] = useState(false);
   const [selectedModels, setSelectedModels] = useState([]);
   const [selectedMetrics, setSelectedMetrics] = useState([]);
+  const [metricsOpen, setMetricsOpen] = useState(true); // Collapsible state
 
   const models = ["OpenAI 4o-mini", "Gemini", "Gemma", "Llama", "DeepSeek"];
   const responses = {
@@ -54,6 +56,7 @@ export default function Home() {
   const handleEnter = () => {
     setSelectedModels([defaultModel, comparisonModel, ...additionalModels]);
     setShowResponses(true);
+    setMetricsOpen(false); // Collapse metrics on Enter
   };
 
   const toggleMetric = (metric) => {
@@ -120,22 +123,35 @@ export default function Home() {
           </Button>
         </div>
 
-        {/* Evaluation Metrics (Checkboxes) */}
-        <div className="mb-6 p-4 bg-white rounded-lg shadow">
-          <h4 className="text-lg font-semibold mb-2">Select Evaluation Metrics:</h4>
-          <div className="grid grid-cols-2 gap-2">
-            {evaluationMetrics.map((metric) => (
-              <label key={metric} className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  className="h-4 w-4 text-blue-600"
-                  checked={selectedMetrics.includes(metric)}
-                  onChange={() => toggleMetric(metric)}
-                />
-                <span className="text-sm">{metric}</span>
-              </label>
-            ))}
+        {/* Collapsible Evaluation Metrics Section */}
+        <div className="mb-6 bg-gray-100 rounded-lg shadow">
+          <div
+            className="flex justify-between items-center p-4 cursor-pointer bg-whitesmoke rounded-t-lg"
+            onClick={() => setMetricsOpen(!metricsOpen)}
+          >
+            <h4 className="text-md font-semibold">Select Evaluation Metrics</h4>
+            {metricsOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
           </div>
+          <motion.div
+            initial={{ height: "auto" }}
+            animate={{ height: metricsOpen ? "auto" : 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="overflow-hidden"
+          >
+            <div className="grid grid-cols-2 gap-2 p-4">
+              {evaluationMetrics.map((metric) => (
+                <label key={metric} className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 text-blue-600"
+                    checked={selectedMetrics.includes(metric)}
+                    onChange={() => toggleMetric(metric)}
+                  />
+                  <span className="text-sm">{metric}</span>
+                </label>
+              ))}
+            </div>
+          </motion.div>
         </div>
 
         {/* Input Area */}
@@ -161,33 +177,14 @@ export default function Home() {
           transition={{ duration: 0.7, ease: "easeInOut" }}
           className="h-full flex"
         >
-          {/* Smooth Divider Transition */}
-          <motion.div
-            initial={{ width: 0, opacity: 0 }}
-            animate={{ width: "10px", opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
-            className="bg-gray-400 h-full"
-          />
-
-          {/* Responses Section */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.4, ease: "easeOut" }}
-            className="p-6 bg-gray-200 h-full w-full flex flex-col"
-          >
+          <motion.div initial={{ width: 0, opacity: 0 }} animate={{ width: "10px", opacity: 1 }} transition={{ duration: 0.5, delay: 0.3 }} className="bg-gray-400 h-full" />
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.4 }} className="p-6 bg-gray-200 h-full w-full flex flex-col">
             <h3 className="text-2xl font-semibold mb-4 text-center">Responses</h3>
             <div className="overflow-auto flex-grow">
               {selectedModels.map((model) => (
-                <motion.div
-                  key={model}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, ease: "easeOut" }}
-                  className="p-3 mb-2 bg-gray-300 rounded-lg"
-                >
+                <div key={model} className="p-3 mb-2 bg-gray-300 rounded-lg">
                   <strong>{model}:</strong> {responses[model] || "No response available."}
-                </motion.div>
+                </div>
               ))}
             </div>
           </motion.div>
