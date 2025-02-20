@@ -12,6 +12,7 @@ export default function Home() {
   const [inputValue, setInputValue] = useState("");
   const [showResponses, setShowResponses] = useState(false);
   const [selectedModels, setSelectedModels] = useState([]);
+  const [selectedMetrics, setSelectedMetrics] = useState([]);
 
   const models = ["OpenAI 4o-mini", "Gemini", "Gemma", "Llama", "DeepSeek"];
   const responses = {
@@ -21,6 +22,24 @@ export default function Home() {
     Llama: "This is a response from Llama.",
     DeepSeek: "This is a response from DeepSeek.",
   };
+
+  const evaluationMetrics = [
+    "Accuracy of Responses",
+    "Response Time (Latency)",
+    "Sentiment & Tone Alignment",
+    "Context Retention (Multi-turn Conversations)",
+    "Hallucination Detection",
+    "Intent Recognition & Routing",
+    "Personalization & Customer Recognition",
+    "Compliance & Security",
+    "Escalation Handling",
+    "Language & Accent Understanding",
+    "Handling Interruptions & Corrections",
+    "Handling Noisy Input (Speech-to-Text Evaluation)",
+    "Query Complexity Handling",
+    "Emotional Intelligence & Empathy",
+    "Conversational Flow & Engagement",
+  ];
 
   const handleAddModel = () => {
     setAdditionalModels([...additionalModels, ""]);
@@ -37,6 +56,14 @@ export default function Home() {
     setShowResponses(true);
   };
 
+  const toggleMetric = (metric) => {
+    setSelectedMetrics((prevMetrics) =>
+      prevMetrics.includes(metric)
+        ? prevMetrics.filter((m) => m !== metric)
+        : [...prevMetrics, metric]
+    );
+  };
+
   return (
     <div className="h-screen flex w-full">
       {/* Compare Models Section - Shrinking */}
@@ -47,6 +74,8 @@ export default function Home() {
         className="p-6 bg-gray-100 h-full flex flex-col"
       >
         <h3 className="text-2xl font-semibold mb-4 text-center">Compare Models</h3>
+
+        {/* Model Selection */}
         <div className="flex flex-wrap gap-4 mb-6">
           <Select onValueChange={setDefaultModel} defaultValue={defaultModel}>
             <SelectTrigger className="w-1/3">
@@ -90,12 +119,33 @@ export default function Home() {
             Add Model
           </Button>
         </div>
+
+        {/* Evaluation Metrics (Checkboxes) */}
+        <div className="mb-6 p-4 bg-white rounded-lg shadow">
+          <h4 className="text-lg font-semibold mb-2">Select Evaluation Metrics:</h4>
+          <div className="grid grid-cols-2 gap-2">
+            {evaluationMetrics.map((metric) => (
+              <label key={metric} className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 text-blue-600"
+                  checked={selectedMetrics.includes(metric)}
+                  onChange={() => toggleMetric(metric)}
+                />
+                <span className="text-sm">{metric}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Input Area */}
         <Textarea
           className="w-full p-3 rounded-lg border border-gray-300 focus:ring focus:ring-blue-300 flex-grow"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           placeholder="Enter your text..."
         />
+
         <div className="flex justify-end mt-4">
           <Button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700" onClick={handleEnter}>
             Enter
