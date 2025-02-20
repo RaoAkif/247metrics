@@ -2,16 +2,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
 import { motion } from "framer-motion";
-import { ChevronDown, ChevronUp } from "lucide-react";
 import ModelSelection from "@/components/ModelSelection";
+import EvaluationMetrics from "@/components/EvaluationMetrics";
 
 export default function Home() {
   const initialModels: string[] = [
@@ -39,13 +32,6 @@ export default function Home() {
     DeepSeek: "Response from DeepSeek",
   };
 
-  // Reset models when default model is changed
-  const handleDefaultModelChange = (value: string) => {
-    setDefaultModel(value);
-    setComparisonModel("");
-    setAdditionalModels([]);
-  };
-
   const evaluationMetrics: string[] = [
     "Accuracy of Responses",
     "Response Time (Latency)",
@@ -64,34 +50,12 @@ export default function Home() {
     "Conversational Flow & Engagement",
   ];
 
-  // Get available models for selection (excluding selected ones)
-  const getAvailableModels = (excludeModels: string[]) =>
-    initialModels.filter((model) => !excludeModels.includes(model));
-
-  const handleAddModel = () => {
-    setAdditionalModels([...additionalModels, ""]);
-  };
-
-  const handleModelChange = (index: number, value: string) => {
-    const updatedModels = [...additionalModels];
-    updatedModels[index] = value;
-    setAdditionalModels(updatedModels);
-  };
-
   const handleEnter = () => {
     setSelectedModels(
       [defaultModel, comparisonModel, ...additionalModels].filter(Boolean)
     );
     setShowResponses(true);
     setMetricsOpen(false);
-  };
-
-  const toggleMetric = (metric: string) => {
-    setSelectedMetrics((prevMetrics) =>
-      prevMetrics.includes(metric)
-        ? prevMetrics.filter((m) => m !== metric)
-        : [...prevMetrics, metric]
-    );
   };
 
   return (
@@ -117,36 +81,14 @@ export default function Home() {
           setAdditionalModels={setAdditionalModels}
         />
 
-        {/* Collapsible Evaluation Metrics Section */}
-        <div className="mb-6 bg-gray-100 rounded-lg shadow">
-          <div
-            className="flex justify-between items-center p-4 cursor-pointer bg-whitesmoke rounded-t-lg"
-            onClick={() => setMetricsOpen(!metricsOpen)}
-          >
-            <h4 className="text-md font-semibold">Select Evaluation Metrics</h4>
-            {metricsOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-          </div>
-          <motion.div
-            initial={{ height: "auto" }}
-            animate={{ height: metricsOpen ? "auto" : 0 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="overflow-hidden"
-          >
-            <div className="grid grid-cols-2 gap-2 p-4">
-              {evaluationMetrics.map((metric) => (
-                <label key={metric} className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4 text-blue-600"
-                    checked={selectedMetrics.includes(metric)}
-                    onChange={() => toggleMetric(metric)}
-                  />
-                  <span className="text-sm">{metric}</span>
-                </label>
-              ))}
-            </div>
-          </motion.div>
-        </div>
+        {/* Evaluation Metrics Component */}
+        <EvaluationMetrics
+          evaluationMetrics={evaluationMetrics}
+          selectedMetrics={selectedMetrics}
+          setSelectedMetrics={setSelectedMetrics}
+          metricsOpen={metricsOpen}
+          setMetricsOpen={setMetricsOpen}
+        />
 
         {/* Input Area */}
         <Textarea
