@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
@@ -16,6 +17,13 @@ export default function EvaluationMetrics({
   metricsOpen,
   setMetricsOpen,
 }: EvaluationMetricsProps) {
+  // Initialize all checkboxes to be checked by default
+  useEffect(() => {
+    if (selectedMetrics.length === 0) {
+      setSelectedMetrics(evaluationMetrics);
+    }
+  }, [evaluationMetrics, selectedMetrics.length, setSelectedMetrics]);
+
   const toggleMetric = (metric: string) => {
     setSelectedMetrics(
       selectedMetrics.includes(metric)
